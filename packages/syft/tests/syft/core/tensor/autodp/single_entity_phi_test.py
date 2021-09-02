@@ -71,6 +71,42 @@ def test_le() -> None:
     assert tensor1.__le__(simple_type2)
 
 
+def test_ge() -> None:
+
+    assert tensor1.__ge__(tensor2)
+    assert tensor1.__ge__(tensor3), "tensor1 is not greater than or equal to tensor3"
+    assert tensor1.__ge__(tensor4) == NotImplemented
+    assert tensor1.__ge__(tensor5) == NotImplemented
+    assert tensor1.__ge__(simple_type1)
+    assert tensor1.__ge__(
+        simple_type2
+    ), "tensor1 is not greater than or equal to simple_type1"
+
+
+def test_lt() -> None:
+
+    assert tensor1.__lt__(
+        tensor2
+    ), "tensor1 is not less than tensor2, they are both equal"
+    assert tensor1.__lt__(tensor3)
+    assert tensor1.__lt__(tensor4) == NotImplemented
+    assert tensor1.__lt__(tensor5) == NotImplemented
+    assert tensor1.__lt__(simple_type1), "tensor1 is not less than simple_type1"
+    assert tensor1.__lt__(simple_type2)
+
+
+def test_gt() -> None:
+
+    assert tensor1.__gt__(
+        tensor2
+    ), "tensor1 is not greater than tensor2, they are both equal"
+    assert tensor1.__gt__(tensor3), "tensor1 is not greater than tensor3"
+    assert tensor1.__gt__(tensor4) == NotImplemented
+    assert tensor1.__gt__(tensor5) == NotImplemented
+    assert tensor1.__gt__(simple_type1)
+    assert tensor1.__gt__(simple_type2), "tensor1 is not greater than simple_type1"
+
+
 #
 # ######################### ADD ############################
 #
