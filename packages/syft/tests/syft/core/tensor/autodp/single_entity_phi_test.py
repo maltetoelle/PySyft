@@ -1,3 +1,6 @@
+# stdlib
+from random import uniform
+
 # third party
 import numpy as np
 import pytest
@@ -6,6 +9,7 @@ import pytest
 from syft import deserialize
 from syft import serialize
 from syft.core.adp.entity import Entity
+from syft.core.tensor.autodp.single_entity_phi import SingleEntityPhiTensor
 from syft.core.tensor.tensor import Tensor
 
 gonzalo = Entity(name="Gonzalo")
@@ -23,6 +27,48 @@ def y() -> Tensor:
     y = Tensor(np.array([[-1, -2, -3], [-4, -5, -6]]))
     y = y.private(min_val=-7, max_val=1, entity=gonzalo)
     return y
+
+
+ent = Entity(name="test")
+ent2 = Entity(name="test2")
+
+child1 = np.random.uniform(-2, 3, 5)
+child2 = np.random.uniform(4, 6, 5)
+
+tensor1 = SingleEntityPhiTensor(
+    child=child1, entity=ent, max_vals=np.amax(child1), min_vals=np.amin(child1)
+)
+# same entity, same data
+tensor2 = SingleEntityPhiTensor(
+    child=child1, entity=ent, max_vals=np.amax(child1), min_vals=np.amin(child1)
+)
+# same entity, different data
+tensor3 = SingleEntityPhiTensor(
+    child=child2, entity=ent, max_vals=np.amax(child2), min_vals=np.amin(child2)
+)
+# different entity, same data
+tensor4 = SingleEntityPhiTensor(
+    child=child1, entity=ent2, max_vals=np.amax(child1), min_vals=np.amin(child1)
+)
+# different entity, different data
+tensor5 = SingleEntityPhiTensor(
+    child=child2, entity=ent2, max_vals=np.amax(child2), min_vals=np.amin(child2)
+)
+
+simple_type1 = uniform(-6, -4)
+simple_type2 = uniform(4, 6)
+
+
+def test_le() -> None:
+
+    assert tensor1.__le__(tensor2)
+    assert tensor3.__le__(tensor1), "tensor3 is not less than or equal to tensor1"
+    assert tensor1.__le__(tensor4) == NotImplemented
+    assert tensor1.__le__(tensor5) == NotImplemented
+    assert tensor1.__le__(
+        simple_type1
+    ), "tensor1 is not less than or equal to simple_type1"
+    assert tensor1.__le__(simple_type2)
 
 
 #
