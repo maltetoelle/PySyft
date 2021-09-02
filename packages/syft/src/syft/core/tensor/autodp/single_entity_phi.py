@@ -521,8 +521,8 @@ class SingleEntityPhiTensor(PassthroughTensor, AutogradTensorAncestor, Recursive
     def __neg__(self) -> SingleEntityPhiTensor:
 
         data = self.child * -1
-        min_vals = self.min_vals * -1
-        max_vals = self.max_vals * -1
+        min_vals = self.max_vals * -1
+        max_vals = self.min_vals * -1
         entity = self.entity
 
         return SingleEntityPhiTensor(
