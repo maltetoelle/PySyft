@@ -245,6 +245,66 @@ class RowEntityPhiTensor(PassthroughTensor, RecursiveSerde):
 
         return RowEntityPhiTensor(rows=new_list, check_shape=False)
 
+    def __le__(self, other: Any) -> RowEntityPhiTensor:
+
+        if is_acceptable_simple_type(other) or len(self.child) == len(other.child):  # type: ignore
+            new_list = list()
+            for i in range(len(self.child)):
+                if is_acceptable_simple_type(other):
+                    new_list.append(self.child[i] <= other)
+                else:
+                    new_list.append(self.child[i] <= other.child[i])  # type: ignore
+            return RowEntityPhiTensor(rows=new_list, check_shape=False)
+        else:
+            raise Exception(
+                f"Tensor dims do not match for __le__: {len(self.child)} != {len(other.child)}"  # type: ignore
+            )
+
+    def __ge__(self, other: Any) -> RowEntityPhiTensor:
+
+        if is_acceptable_simple_type(other) or len(self.child) == len(other.child):  # type: ignore
+            new_list = list()
+            for i in range(len(self.child)):
+                if is_acceptable_simple_type(other):
+                    new_list.append(self.child[i] >= other)
+                else:
+                    new_list.append(self.child[i] >= other.child[i])  # type: ignore
+            return RowEntityPhiTensor(rows=new_list, check_shape=False)
+        else:
+            raise Exception(
+                f"Tensor dims do not match for __ge__: {len(self.child)} != {len(other.child)}"  # type: ignore
+            )
+
+    def __lt__(self, other: Any) -> RowEntityPhiTensor:
+
+        if is_acceptable_simple_type(other) or len(self.child) == len(other.child):  # type: ignore
+            new_list = list()
+            for i in range(len(self.child)):
+                if is_acceptable_simple_type(other):
+                    new_list.append(self.child[i] < other)
+                else:
+                    new_list.append(self.child[i] < other.child[i])  # type: ignore
+            return RowEntityPhiTensor(rows=new_list, check_shape=False)
+        else:
+            raise Exception(
+                f"Tensor dims do not match for __lt__: {len(self.child)} != {len(other.child)}"  # type: ignore
+            )
+
+    def __gt__(self, other: Any) -> RowEntityPhiTensor:
+
+        if is_acceptable_simple_type(other) or len(self.child) == len(other.child):  # type: ignore
+            new_list = list()
+            for i in range(len(self.child)):
+                if is_acceptable_simple_type(other):
+                    new_list.append(self.child[i] > other)
+                else:
+                    new_list.append(self.child[i] > other.child[i])  # type: ignore
+            return RowEntityPhiTensor(rows=new_list, check_shape=False)
+        else:
+            raise Exception(
+                f"Tensor dims do not match for __gt__: {len(self.child)} != {len(other.child)}"  # type: ignore
+            )
+
 
 @implements(RowEntityPhiTensor, np.expand_dims)
 def expand_dims(a: np.typing.ArrayLike, axis: int) -> RowEntityPhiTensor:
