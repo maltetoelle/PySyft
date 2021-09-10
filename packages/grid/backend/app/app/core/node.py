@@ -16,9 +16,9 @@ from app.db.session import SessionLocal
 from app.db.session import engine
 
 if settings.NODE_TYPE.lower() == "domain":
-    node = Domain("Domain", db_engine=engine)
+    node = Domain("Domain", db_engine=get_db_engine())
 elif settings.NODE_TYPE.lower() == "network":
-    node = Network("Network", db_engine=engine)
+    node = Network("Network", db_engine=get_db_engine())
 else:
     raise Exception(
         "Don't know NODE_TYPE "

@@ -21,7 +21,7 @@ reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/login")
 
 def get_db() -> Generator:
     try:
-        db = SessionLocal()
+        db = get_db_session()
         yield db
     finally:
         db.close()
