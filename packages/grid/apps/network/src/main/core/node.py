@@ -97,7 +97,7 @@ def create_network_app(app, args, testing=False):
     app.config["EXECUTOR_TYPE"] = "thread"
     executor.init_app(app)
 
-    return app
+    return app, node
 
 
 def create_domain_app(app, args, testing=False):

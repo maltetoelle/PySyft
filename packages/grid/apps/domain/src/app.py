@@ -94,7 +94,7 @@ def create_app(
     app.config.from_object("config")
 
     # Create Domain APP
-    app = create_domain_app(app=app, args=args, testing=testing)
+    app, node = create_domain_app(app=app, args=args, testing=testing)
     CORS(app)
 
     app.debug = debug
@@ -102,4 +102,4 @@ def create_app(
 
     # Send app instance
     logger.info(f"{app_info} is Ready")
-    return app
+    return app, node

@@ -98,11 +98,11 @@ def create_app(
     # sockets = Sockets(app)
 
     # Create Domain APP
-    app = create_network_app(app=app, args=args, testing=testing)
+    app, node = create_network_app(app=app, args=args, testing=testing)
 
     app.debug = debug
     app.config["SECRET_KEY"] = secret_key
 
     # Send app instance
     logger.info(f"{app_info} is Ready")
-    return app
+    return app, node
