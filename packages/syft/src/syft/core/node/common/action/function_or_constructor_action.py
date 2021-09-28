@@ -77,6 +77,7 @@ class RunFunctionOrConstructorAction(ImmediateActionWithoutReply):
         return {k: left[k] for k in intersection}
 
     def execute_action(self, node: AbstractNode, verify_key: VerifyKey) -> None:
+
         method = node.lib_ast(self.path)
         result_read_permissions: Union[None, Dict[VerifyKey, UID]] = None
 
@@ -91,7 +92,11 @@ class RunFunctionOrConstructorAction(ImmediateActionWithoutReply):
                     )
                 )
 
-            r_arg = node.store[arg.id_at_location]
+            r_arg = None
+            if hasattr(node, "memory_store"):
+                r_arg = node.memory_store[arg.id_at_location]
+            if r_arg is None:
+                r_arg = node.store[arg.id_at_location]
             result_read_permissions = self.intersect_keys(
                 result_read_permissions, r_arg.read_permissions
             )
@@ -109,7 +114,11 @@ class RunFunctionOrConstructorAction(ImmediateActionWithoutReply):
                     )
                 )
 
-            r_arg = node.store[arg.id_at_location]
+            r_arg = None
+            if hasattr(node, "memory_store"):
+                r_arg = node.memory_store[arg.id_at_location]
+            if r_arg is None:
+                r_arg = node.store[arg.id_at_location]
             result_read_permissions = self.intersect_keys(
                 result_read_permissions, r_arg.read_permissions
             )
@@ -122,7 +131,6 @@ class RunFunctionOrConstructorAction(ImmediateActionWithoutReply):
             upcasted_kwargs,
         ) = lib.python.util.upcast_args_and_kwargs(resolved_args, resolved_kwargs)
 
-        # execute the method with the newly upcasted args and kwargs
         result = method(*upcasted_args, **upcasted_kwargs)
 
         # to avoid circular imports
@@ -145,7 +153,7 @@ class RunFunctionOrConstructorAction(ImmediateActionWithoutReply):
                 data=result,
                 read_permissions=result_read_permissions,
             )
-
+        # print(5)
         inherit_tags(
             attr_path_and_name=self.path,
             result=result,
@@ -154,7 +162,12 @@ class RunFunctionOrConstructorAction(ImmediateActionWithoutReply):
             kwargs=tag_kwargs,
         )
 
-        node.store[self.id_at_location] = result
+        if hasattr(node, "memory_store"):
+            node.memory_store[self.id_at_location] = result
+        try:
+            node.store[self.id_at_location] = result
+        except Exception as e:
+            print("EXCEPTION IN STORE: ", e)
 
     def __repr__(self) -> str:
         method_name = self.path.split(".")[-1]

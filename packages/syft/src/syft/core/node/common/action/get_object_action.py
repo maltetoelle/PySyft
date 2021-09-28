@@ -161,7 +161,10 @@ class GetObjectAction(ImmediateActionWithReply):
     ) -> ImmediateSyftMessageWithoutReply:
         try:
             try:
-                storable_object = node.store[self.id_at_location]
+                if hasattr(node, "memory_store"):
+                    storable_object = node.memory_store[self.id_at_location]
+                else:
+                    storable_object = node.store[self.id_at_location]
             except Exception as e:
                 log = (
                     f"Unable to Get Object with ID {self.id_at_location} from store. "
@@ -192,6 +195,8 @@ class GetObjectAction(ImmediateActionWithReply):
                     debug(
                         f"Calling delete on Object with ID {self.id_at_location} in store."
                     )
+                    if hasattr(node, "memory_store"):
+                        node.memory_store.delete(key=self.id_at_location)
                     node.store.delete(key=self.id_at_location)
                 except Exception as e:
                     log = (

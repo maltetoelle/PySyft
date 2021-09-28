@@ -107,6 +107,7 @@ class Module:
         self.remote_model: Optional["Module"] = None
         self.local_model: Optional["Module"] = None
         self.duet = None
+
         if "syft" in full_name_with_qualname(klass=type(torch_ref)):
             info("> Creating remote model")
             self.is_local = False
@@ -196,6 +197,13 @@ class Module:
             # either way lets concat them until we have a big list of parameters
             params_list += params
         return params_list
+    #
+    # def optim_step(self, lr: float) -> None:
+    #     for _, module in self.modules.items():
+    #         params = module.parameters(True)
+    #         for p in params:
+    #             p.data = p.data - lr * p.grad
+    #             # p.data = torch.zeros_like(p.data)
 
     def cuda(self, device: Any) -> "Module":
         for _, module in self.modules.items():

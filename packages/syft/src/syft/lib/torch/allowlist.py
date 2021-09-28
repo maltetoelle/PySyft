@@ -1056,6 +1056,7 @@ allowlist["torch.Tensor.rfft"] = {
 allowlist["torch.Tensor.device"] = "torch.device"
 allowlist["torch.Tensor.detach_"] = "torch.Tensor"
 allowlist["torch.Tensor.grad"] = "torch.Tensor"  # need an example with grad
+allowlist["torch.nn.Parameter.grad"] = "torch.Tensor"
 
 # --------------------------------------------------------------------------------------
 # SECTION - Tensor methods with specific issues or require a special test combination
@@ -1768,7 +1769,8 @@ allowlist["torch.nn.Module"] = "torch.nn.Module"
 allowlist["torch.nn.Module.__call__"] = "torch.Tensor"
 allowlist["torch.nn.Module.forward"] = "torch.Tensor"
 allowlist["torch.nn.Module.parameters"] = "syft.lib.python.List"
-allowlist["torch.nn.Module._gradients"] = "syft.lib.python.List"
+# allowlist["torch.nn.Module._gradients"] = "syft.lib.python.List"
+# allowlist["torch.nn.Module.optim_step"] = "syft.lib.python._SyNone"
 allowlist["torch.nn.Module.register_parameter"] = "syft.lib.python._SyNone"
 allowlist["torch.nn.Module.train"] = "torch.nn.Module"
 allowlist["torch.nn.Module.cuda"] = "torch.nn.Module"

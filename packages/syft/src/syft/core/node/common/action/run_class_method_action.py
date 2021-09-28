@@ -92,6 +92,9 @@ class RunClassMethodAction(ImmediateActionWithoutReply):
         return f"RunClassMethodAction {self_name}.{method_name}({arg_names}, {kwargs_names})"
 
     def execute_action(self, node: AbstractNode, verify_key: VerifyKey) -> None:
+        # print("EXECUTING ACTION")
+        # print(self.path)
+        # print('*'*10)
         method = node.lib_ast(self.path)
 
         mutating_internal = False
@@ -108,7 +111,11 @@ class RunClassMethodAction(ImmediateActionWithoutReply):
 
         resolved_self = None
         if not self.is_static:
-            resolved_self = node.store.get_object(key=self._self.id_at_location)
+            if hasattr(node, "memory_store"):
+                resolved_self = node.memory_store.get_object(key=self._self.id_at_location)
+
+            if resolved_self is None:
+                resolved_self = node.store.get_object(key=self._self.id_at_location)
 
             if resolved_self is None:
                 critical(
@@ -123,7 +130,14 @@ class RunClassMethodAction(ImmediateActionWithoutReply):
         resolved_args = list()
         tag_args = []
         for arg in self.args:
-            r_arg = node.store[arg.id_at_location]
+
+            r_arg = None
+            if hasattr(node, "memory_store"):
+                r_arg = node.memory_store[arg.id_at_location]
+
+            if r_arg is None:
+                r_arg = node.store[arg.id_at_location]
+
             result_read_permissions = self.intersect_keys(
                 result_read_permissions, r_arg.read_permissions
             )
@@ -133,7 +147,14 @@ class RunClassMethodAction(ImmediateActionWithoutReply):
         resolved_kwargs = {}
         tag_kwargs = {}
         for arg_name, arg in self.kwargs.items():
-            r_arg = node.store[arg.id_at_location]
+
+            r_arg = None
+            if hasattr(node, "memory_store"):
+                r_arg = node.memory_store[arg.id_at_location]
+
+            if r_arg is None:
+                r_arg = node.store[arg.id_at_location]
+
             result_read_permissions = self.intersect_keys(
                 result_read_permissions, r_arg.read_permissions
             )
@@ -241,6 +262,8 @@ class RunClassMethodAction(ImmediateActionWithoutReply):
             kwargs=tag_kwargs,
         )
 
+        if hasattr(node, "memory_store"):
+            node.memory_store[self.id_at_location] = result
         node.store[self.id_at_location] = result
 
     def _object2proto(self) -> RunClassMethodAction_PB:

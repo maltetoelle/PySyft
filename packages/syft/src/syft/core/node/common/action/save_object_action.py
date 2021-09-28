@@ -47,6 +47,8 @@ class SaveObjectAction(ImmediateActionWithoutReply, Serializable):
             node.verify_key: node.id,
             verify_key: None,  # we dont have the passed in sender's UID
         }
+        if hasattr(node, "memory_store"):
+            node.memory_store[self.obj.id] = self.obj
         node.store[self.obj.id] = self.obj
 
     def _object2proto(self) -> SaveObjectAction_PB:

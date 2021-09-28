@@ -108,6 +108,12 @@ def create_request_msg(
     requests = node.data_requests
     object_uid = UID.from_string(object_id)
 
+    # tags = None
+    # if hasattr(node, "memory_store"):
+    #     tags = node.memory_store[object_uid]._tags
+    # if tags is None:
+    tags = node.store[object_uid]._tags
+
     request_obj = requests.create_request(
         user_id=current_user.id,
         user_name=current_user.email,
@@ -116,7 +122,7 @@ def create_request_msg(
         request_type=request_type,
         verify_key=verify_key.encode(encoder=HexEncoder).decode("utf-8"),
         object_type=object_type,
-        tags=node.store[object_uid]._tags,
+        tags=tags,
     )
     request_json = model_to_json(request_obj)
 
@@ -458,6 +464,12 @@ def build_request_message(
         verify_key=verify_key.encode(encoder=HexEncoder).decode("utf-8")
     )
 
+    tags = None
+    if hasattr(node, "memory_store"):
+        tags = node.memory_store[msg.object_id]._tags
+    if tags is None:
+        tags = node.store[msg.object_id]._tags
+
     node.data_requests.create_request(
         user_id=current_user.id,
         user_name=current_user.email,
@@ -466,7 +478,7 @@ def build_request_message(
         request_type="permissions",
         verify_key=verify_key.encode(encoder=HexEncoder).decode("utf-8"),
         object_type=msg.object_type,
-        tags=node.store[msg.object_id]._tags,
+        tags=tags,
     )
 
 
@@ -488,10 +500,16 @@ def accept_or_deny_request(
     _can_triage_request = node.users.can_triage_requests(user_id=current_user.id)
     if _msg.accept:
         if _req and _can_triage_request:
-            tmp_obj = node.store[UID.from_string(_req.object_id)]
+            tmp_obj = None
+            if hasattr(node, "memory_store"):
+                tmp_obj = node.memory_store[UID.from_string(_req.object_id)]
+            if tmp_obj is None:
+                tmp_obj = node.store[UID.from_string(_req.object_id)]
             tmp_obj.read_permissions[
                 VerifyKey(_req.verify_key.encode("utf-8"), encoder=HexEncoder)
             ] = _req.id
+            if hasattr(node, "memory_store"):
+                node.memory_store[UID.from_string(_req.object_id)] = tmp_obj
             node.store[UID.from_string(_req.object_id)] = tmp_obj
             node.data_requests.set(request_id=_req.id, status="accepted")
     else:

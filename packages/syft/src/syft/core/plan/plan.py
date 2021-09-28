@@ -116,7 +116,11 @@ class Plan(Serializable):
         if len(self.outputs):
             resolved_outputs = []
             for arg in self.outputs:
-                r_arg = node.store[arg.id_at_location]
+                r_arg = None
+                if hasattr(node, "memory_store"):
+                    r_arg = node.memory_store[arg.id_at_location]
+                if r_arg is None:
+                    r_arg = node.store[arg.id_at_location]
                 resolved_outputs.append(r_arg.data)
             return resolved_outputs
         else:

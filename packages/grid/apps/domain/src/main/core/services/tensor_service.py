@@ -138,6 +138,8 @@ def get_tensor_msg(
 
         # Retrieve the dataset from node.store
         key = UID.from_string(value=payload["tensor_id"])
+        print("GETTING TENSOR")
+        print('*'* 10)
         tensor = node.store[key]
         return GetTensorResponse(
             address=msg.reply_to,

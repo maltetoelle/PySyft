@@ -39,6 +39,7 @@ class BroadcastSearchService(ImmediateNodeServiceWithReply):
         verify_key: VerifyKey,
     ) -> NetworkSearchResponse:
         queries = set(msg.content.get("query", []))
+
         associations = node.association_requests.associations()
 
         def filter_domains(url):

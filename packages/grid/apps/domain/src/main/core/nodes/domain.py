@@ -45,6 +45,7 @@ from syft.core.node.common.service.resolve_pointer_type_service import (
 )
 from syft.core.node.device.client import DeviceClient
 from syft.core.node.domain.domain import Domain
+from syft.core.store import MemoryStore
 from syft.grid.connections.http_connection import HTTPConnection
 import sympc
 import tenseal as ts
@@ -103,6 +104,7 @@ class GridDomain(Domain):
         self.disk_store = DiskObjectStore(db)
         if not os.getenv("MEMORY_STORE", None):
             self.store = DiskObjectStore(db)
+            self.memory_store = MemoryStore()
         self.environments = EnvironmentManager(db)
         self.setup = SetupManager(db)
         self.association_requests = AssociationRequestManager(db)

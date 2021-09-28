@@ -124,6 +124,7 @@ class Node(AbstractNode):
         if db_path is not None:
             try:
                 self.store = DiskObjectStore(db_path=db_path)
+                # self.memory_store = MemoryStore()
                 log = f"Opened DiskObjectStore at {db_path}."
                 debug(log)
             except Exception as e:

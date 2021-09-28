@@ -60,8 +60,12 @@ class MemoryStore(ObjectStore):
 
     def __getitem__(self, key: UID) -> StorableObject:
         try:
-            return self._objects[key]
-        except Exception as e:
+            if not key in self._objects.keys():
+                critical(f"{type(self)} __getitem__ error {key} in memory_store")
+            else:
+                obj = self._objects[key]
+                return obj
+        except KeyError as e:
             critical(f"{type(self)} __getitem__ error {key} {e}")
             traceback_and_raise(e)
 
