@@ -15,6 +15,9 @@ from typing import Tuple
 from typing import Union
 import warnings
 
+# third party
+from eventlet.timeout import Timeout
+
 # syft relative
 from .. import ast
 from .. import lib
