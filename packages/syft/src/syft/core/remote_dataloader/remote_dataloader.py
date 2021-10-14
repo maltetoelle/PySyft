@@ -24,6 +24,27 @@ from ..common.serde.serializable import bind_protobuf
 
 DATA_TYPE_TORCH_TENSOR = "torch_tensor"
 
+from typing import List, Tuple, Union
+import torch as th
+from torch.utils.data import Dataset
+
+
+class CTDICOMDataset(Dataset):
+    def __init__(self, ct_paths: List[str], ops_codes_paths: List[str]):
+        self.ct_paths = ct_paths
+        self.ops_codes_paths = ops_codes_paths
+
+    def __getitem__(self, idx: Union[int, slice]) -> Tuple[th.Tensor, th.Tensor]:
+        if type(idx) == slice:
+            ct_vol = th.stack([th.load(self.ct_paths[i]) for i in range(idx.start, idx.stop)])
+            ops_codes = th.stack([th.load(self.ops_codes_paths[i]) for i in range(idx.start, idx.stop)])
+        else:
+            ct_vol = th.load(self.ct_paths[idx])  # [None]
+            ops_codes = th.load(self.ops_codes_paths[idx])  # [None]
+        return ct_vol, ops_codes
+
+    def __len__(self) -> int:
+        return len(self.ct_paths)
 
 @bind_protobuf
 class RemoteDataset(Dataset, Serializable):

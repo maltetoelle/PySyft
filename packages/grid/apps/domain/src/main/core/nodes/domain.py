@@ -49,6 +49,7 @@ from syft.core.store import MemoryStore
 from syft.grid.connections.http_connection import HTTPConnection
 import sympc
 import tenseal as ts
+import opacus
 
 # grid relative
 from ..database import db
@@ -74,6 +75,7 @@ from ..services.user_service import UserManagerService
 
 
 class GridDomain(Domain):
+
     def __init__(
         self,
         name: Optional[str],

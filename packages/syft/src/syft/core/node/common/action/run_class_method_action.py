@@ -264,7 +264,10 @@ class RunClassMethodAction(ImmediateActionWithoutReply):
 
         if hasattr(node, "memory_store"):
             node.memory_store[self.id_at_location] = result
-        node.store[self.id_at_location] = result
+        try:
+            node.store[self.id_at_location] = result
+        except:
+            print("STORING IN DISKSTORE NOT POSSIBLE")
 
     def _object2proto(self) -> RunClassMethodAction_PB:
         """Returns a protobuf serialization of self.
