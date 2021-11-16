@@ -58,15 +58,14 @@ class GridClient(DomainClient):
         conn_type: Type[ClientConnection],
         client_type: Type[Client],
         user_key: Optional[SigningKey] = None,
-        network_url: Optional[str] = None,
-        role: Optional[str] = None,
+        network_url: Optional[str] = None
     ) -> None:
 
         # Use Server metadata
         # to build client route
         conn_kwargs = dict(url=url)
         if conn_type != GridHTTPConnection:
-            conn_kwargs = dict(url=url, network_url=network_url, role=role)
+            conn_kwargs = dict(url=url, network_url=network_url)
         self.conn = conn_type(**conn_kwargs)  # type: ignore
         self.client_type = client_type
 
@@ -246,7 +245,6 @@ def connect(
         conn_type=conn_type,
         client_type=DomainClient,
         user_key=user_key,
-        role=role,
         network_url=network_url
     )
 
