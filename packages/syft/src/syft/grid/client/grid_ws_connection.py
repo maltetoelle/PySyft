@@ -74,11 +74,13 @@ def socket_wrapper(sio_ev: str, response_fn: Optional[Callable] = decrypt_respon
             # TODO: make timeout dependent on length of data
             # TODO: two timeouts working for now because two stage comm.?
             # response = ev.wait()
-            timeout = Timeout(2)
+            timeout = Timeout(10)
             try:
                 response = ev.wait()
             except Timeout:
                 pass
+            # finally:
+            #     timeout.cancel()
             try:
                 response = ev.wait()
             except Timeout:
@@ -149,8 +151,10 @@ class GridWSConnection(WSConnection):
         self.email = credentials["email"]
         if self.pub_key is None:
             _email = re.sub("[.@]", "", credentials["email"])
-            pub_key_path = glob.glob(f"ssh-keys/public_{_email}.pem")[0]
-            self.pub_key = read_pub_key(pub_key_path)
+            # pub_key_path = glob.glob(f"ssh-keys/public_{self.url}_{_email}.pem")[0]
+            _ip = self.base_url.split('/')[-1].split(':')[0]
+            _ip = re.sub('[.:]', '', _ip)
+            self.pub_key = read_pub_key(f"ssh-keys/public_{_ip}_{_email}.pem")
         (enc_pw,), key = self.encode(credentials["password"])
         # enc_key = rsa.encrypt(key, self.pub_key)
         return credentials["email"], enc_pw, key
