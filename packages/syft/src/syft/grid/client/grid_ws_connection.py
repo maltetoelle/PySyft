@@ -73,24 +73,10 @@ def socket_wrapper(sio_ev: str, response_fn: Optional[Callable] = decrypt_respon
 
             # TODO: make timeout dependent on length of data
             # TODO: two timeouts working for now because two stage comm.?
-            # response = ev.wait()
-            timeout = Timeout(10)
-            try:
-                response = ev.wait()
-            except Timeout:
-                pass
-            # finally:
-            #     timeout.cancel()
-            try:
-                response = ev.wait()
-            except Timeout:
-                print("answer timed out")
-                response = ""
-            finally:
-                timeout.cancel()
+            response = None
+            while response is None:
+                response = ev.wait(timeout=0.1)
             sio.disconnect()
-
-            # response = response
 
             if response_fn is not None and isinstance(response, bytes):
                 response = response_fn(self, key, response)
