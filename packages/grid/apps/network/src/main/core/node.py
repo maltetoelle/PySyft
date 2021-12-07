@@ -44,12 +44,6 @@ def get_node():
     global node
     return node
 
-df = pd.DataFrame(columns=["url", "sid"])
-df.set_index("url", inplace=True)
-
-def _answer_callback(ev, data) -> None:
-    ev.send(data)
-answer_callback = lambda ev: functools.partial(_answer_callback, ev)
 
 def create_worker_app(app, args):
     # Register HTTP blueprints
@@ -101,9 +95,16 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
     socketio = None
     if(args.use_websockets):
         socketio = SocketIO(app, manage_session=False)
+
+        df = pd.DataFrame(columns=["url", "sid"])
+        df.set_index("url", inplace=True)
+
+        def _answer_callback(ev, data) -> None:
+            ev.send(data)
+        answer_callback = lambda ev: functools.partial(_answer_callback, ev)
+
         @socketio.on("register_client")
         def register_client(url: str):
-            global df
             if not url in df.index:
                 df.loc[url] = pd.Series(dtype=str)
             df.loc[url]["sid"] = request.sid
