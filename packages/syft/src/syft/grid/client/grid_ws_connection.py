@@ -1,4 +1,5 @@
 # stdlib
+import os
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -36,7 +37,7 @@ def read_priv_key(path: str) -> bytes:
     return priv_key
 
 def decrypt_response(conn: Any, key: bytes, response: bytes) -> bytes:
-    # priv_key_path = glob.glob(f"./ssh-keys/private_ds_*_{url.split('/')[-1]}.pem")[0]
+    # priv_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/private_ds_*_{url.split('/')[-1]}.pem")[0]
     # priv_key = read_priv_key(priv_key_path)
     # key = rsa.decrypt(key, priv_key)
     fernet = Fernet(key)
@@ -91,7 +92,7 @@ def login_response(
         # url: str,
         response: bytes # Dict[str, str]
 ) -> Tuple[Dict, str]:
-    # priv_key_path = glob.glob(f"./ssh-keys/private_ds_*_{url.split('/')[-1]}.pem")[0]
+    # priv_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/private_ds_*_{url.split('/')[-1]}.pem")[0]
     # priv_key = read_priv_key(priv_key_path)
     # key = rsa.decrypt(key, priv_key)
     fernet = Fernet(key)
@@ -120,7 +121,7 @@ class GridWSConnection(WSConnection):
         self.pub_key = None
         # if url.startswith("http"):
         #     url = url.split('/')[-1]
-        # pub_key_path = glob.glob(f"ssh-keys/public_{url}.pem")[0]
+        # pub_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/public_{url}.pem")[0]
         # self.pub_key = read_pub_key(pub_key_path)
         # self.role = role
         # self.priv_key = b""
@@ -137,10 +138,10 @@ class GridWSConnection(WSConnection):
         self.email = credentials["email"]
         if self.pub_key is None:
             _email = re.sub("[.@]", "", credentials["email"])
-            # pub_key_path = glob.glob(f"ssh-keys/public_{self.url}_{_email}.pem")[0]
+            # pub_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/public_{self.url}_{_email}.pem")[0]
             _ip = self.base_url.split('/')[-1].split(':')[0]
             _ip = re.sub('[.:]', '', _ip)
-            self.pub_key = read_pub_key(f"ssh-keys/public_{_ip}_{_email}.pem")
+            self.pub_key = read_pub_key(os.path.expanduser( '~' ) + f"/.ssh/public_{_ip}_{_email}.pem")
         (enc_pw,), key = self.encode(credentials["password"])
         # enc_key = rsa.encrypt(key, self.pub_key)
         return credentials["email"], enc_pw, key
