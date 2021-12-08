@@ -21,6 +21,7 @@ import socketio
 # syft relative
 from syft.core.common.message import SyftMessage
 from syft.core.common.serde.serialize import _serialize
+from syft.grid.connections import get_response
 from syft.proto.core.node.common.metadata_pb2 import Metadata as Metadata_PB
 from syft.grid.connections.ws_connection import WSConnection
 
@@ -74,9 +75,7 @@ def socket_wrapper(sio_ev: str, response_fn: Optional[Callable] = decrypt_respon
 
             # TODO: make timeout dependent on length of data
             # TODO: two timeouts working for now because two stage comm.?
-            response = None
-            while response is None:
-                response = ev.wait(timeout=0.1)
+            response = get_response(ev)
             sio.disconnect()
 
             if response_fn is not None and isinstance(response, bytes):
