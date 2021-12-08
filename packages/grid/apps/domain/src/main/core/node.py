@@ -215,7 +215,6 @@ def create_domain_app(app, args, testing=False):
         @socketio_client.on("connect")
         def connect() -> None:
             print("connected")
-            # url = f"http://localhost:{args.port}"
             url = f"http://{get_own_ip()}:{args.port}"
             socketio_client.emit("register_client", url)
 
@@ -233,16 +232,8 @@ def create_domain_app(app, args, testing=False):
             response, = encode(key, response.encode())
             return response
 
-        # @socketio_client.on("metadata")
-        # def metadata() -> str:
-        #     _metadata = serialize(node.get_metadata_for_client())
-        #     return _metadata.SerializeToString().decode("ISO-8859-1")
-
         @socketio_client.on("pysyft")
         def pysyft(data: bytes, email: str, key: bytes) -> Union[bytes, str]:
-            # data = request.get_data()
-            # if url.startswith("http"):
-            #     url = url.split('/')[-1]
             _ip = get_own_ip()
             _ip = re.sub('[.:]', '', _ip)
             priv_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/private_{_ip}_{re.sub('[.@]', '', email)}.pem")[0]
@@ -257,7 +248,6 @@ def create_domain_app(app, args, testing=False):
                     reply_msg_bytes = _serialize(obj=reply, to_bytes=True)
                     enc_reply_msg_bytes, = encode(key, reply_msg_bytes.decode("ISO-8859-1").encode())
                     return enc_reply_msg_bytes
-                    # return _serialize(obj=reply, to_bytes=True)
                 elif isinstance(obj_msg, SignedImmediateSyftMessageWithoutReply):
                     node.recv_immediate_msg_without_reply(msg=obj_msg)
                 else:
@@ -286,23 +276,16 @@ def create_domain_app(app, args, testing=False):
                     )
 
                 return {"tensors": result}
-                # return GetTensorsResponse(
-                #     address=msg.reply_to,
-                #     status_code=200,
-                #     content={"tensors": result},
-                # )
 
-        # @socketio_client.on("send_association_request")
         @app.route("/ws_conn/send_association_request", methods=["POST"])
         @token_required
         def send_association_request(user: Any):
-            # content = dict(name=name, address=address, sender_address=sender_address)
             content = request.json
             msg = SendAssociationRequestMessage(
                 address=node.address,
                 content=content,
                 reply_to=node.address
-            )#.sign(node.signing_key)
+            )
 
             name = msg.content.get("name", None)
             target_address = msg.content.get("address", None)
@@ -340,9 +323,6 @@ def create_domain_app(app, args, testing=False):
                     "sender_address": target_address,
                 }
 
-            # signed_msg = msg.sign(node.signing_key)
-            # msg_bytes = _serialize(obj=signed_msg, to_bytes=True)
-
                 ev = event.Event()
 
                 socketio_client.emit(
@@ -360,9 +340,8 @@ def create_domain_app(app, args, testing=False):
                     address=node.address,
                     content=payload,
                     reply_to=node.address
-                )#.sign(node.signing_key)
+                )
                 response_msg = recv_association_request_msg(msg=msg, node=node, verify_key=node.verify_key)
-                # return _serialize(obj=response_msg, to_bytes=True).decode("ISO-8859-1")
 
                 return response_msg.content
 
