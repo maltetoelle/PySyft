@@ -223,10 +223,7 @@ def create_domain_app(app, args, testing=False):
             _ip = get_own_ip()
             _ip = re.sub('[.:]', '', _ip)
             priv_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/private_{_ip}_{re.sub('[.@]', '', email)}.pem")[0]
-            print("priv_key_path", priv_key_path)
             priv_key = read_priv_key(priv_key_path)
-            print("priv_key", priv_key, type(priv_key))
-            print("key", key)
             key = rsa.decrypt(key, priv_key)
             password, = decode(key, password)
             with app.app_context():
