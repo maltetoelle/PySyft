@@ -120,16 +120,7 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
             )
             response = get_response(ev)
             # TODO: SESSION TOKEN
-            return response # , url
-
-        # @socketio.on("metadata")
-        # def metadata(url: str):
-        #     ev = event.Event()
-        #     sid = df.loc[url]["sid"]
-        #     emit(
-        #         "metadata", to=sid,
-        #         callback=answer_callback(ev)
-        #     )
+            return response
 
         @socketio.on("pysyft")
         def pysyft(url: str, data: bytes, key: bytes, email: str):
@@ -157,7 +148,6 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
         @app.route("/ws_conn/respond_association_request", methods=["POST"])
         @token_required
         def accept_association_request(user: Any):
-            # keys: handshake_value of req, value ["accept", "deny"]
             content = request.json
 
             msg = RespondAssociationRequestMessage(
@@ -201,7 +191,6 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
                     "value": value,
                     "sender_address": address,
                 }
-                # url = address + "/association-requests/receive"
                 print("/ws_conn/respond_association_request df", df)
 
                 # response = post(url=url, json=payload)
@@ -222,8 +211,8 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
             # TODO: error handling
             response_msg =  RespondAssociationRequestResponse(
                 address=msg.reply_to,
-                status_code=200, # response.status_code,
-                content={"msg": "Association request replied!"}#response_message},
+                status_code=200,
+                content={"msg": "Association request replied!"}
             )
             return {"message": _serialize(obj=response_msg, to_bytes=True).decode("ISO-8859-1")}
 
@@ -232,13 +221,6 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
         @token_required
         def search(user: Any):
             # TODO: send serialized messages instead of creating them here
-            # msg = NetworkSearchMessage(
-            #     address=node.address,
-            #     content={},
-            #     reply_to=node.address
-            # )
-            #
-            # queries = set(msg.content.get("query", []))
 
             content = request.json
 
@@ -250,7 +232,6 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
 
             def filter_domains(url):
                 print("search-datasets filter_domains", df)
-                # datasets = json.loads(requests.get(url + "/data-centric/tensors").text)
                 sid = df.loc[url]["sid"]
                 ev = event.Event()
                 # TODO: check if message with reply
@@ -273,9 +254,6 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
             match_nodes = [node.address for node in filtered_nodes]
 
             return {"match_nodes": match_nodes}
-            # return NetworkSearchResponse(
-            #     address=msg.reply_to, status_code=200, content={"match-nodes": match_nodes}
-            # )
 
         @app.route("/ws_conn/create_user", methods=["POST"])
         @token_required
@@ -286,8 +264,8 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
                 return {"message", "User already exists!"}, 403
             _private_key = SigningKey.generate()
             _user = node.users.signup(
-                email=data["email"], # _email,
-                password=data["password"], # _password,
+                email=data["email"],
+                password=data["password"],
                 role=node.roles.first(name="Administrator").id, # TODO: add user role to network
                 private_key=_private_key.encode(encoder=HexEncoder).decode("utf-8"),
                 verify_key=_private_key.verify_key.encode(encoder=HexEncoder).decode(
