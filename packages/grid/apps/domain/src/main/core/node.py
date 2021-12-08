@@ -31,6 +31,7 @@ from syft.grid.messages.association_messages import (
 from syft.core.common.message import SignedImmediateSyftMessageWithReply
 from syft.core.common.message import SignedImmediateSyftMessageWithoutReply
 from syft.core.remote_dataloader.remote_dataloader import RemoteDataset
+from syft.grid.connections import get_response
 
 # grid relative
 from ..routes import association_requests_blueprint
@@ -349,24 +350,7 @@ def create_domain_app(app, args, testing=False):
                     payload,
                     callback=lambda msg: ev.send(msg)
                 )
-                response = None
-                while response is None:
-                    response = ev.wait(timeout=0.1)
-                # timeout = Timeout(1)
-                # try:
-                #     response = ev.wait()
-                # except Timeout:
-                #     pass
-                #
-                # try:
-                #     response = ev.wait()
-                # except Timeout:
-                #     pass
-                #     print("answer timed out")
-                #     response = ""
-                # finally:
-                #     timeout.cancel()
-
+                response = get_response(ev, default_return_value="")
                 return {"message": response}
 
         @socketio_client.on("receive_association_request")
