@@ -1,7 +1,6 @@
 import sys
 # third party
 from eventlet import event
-from eventlet.timeout import Timeout
 from flask import Flask, session, request
 from flask_socketio import SocketIO, emit
 import functools
@@ -14,6 +13,7 @@ from syft.grid.messages.association_messages import ReceiveAssociationRequestMes
 from syft.grid.messages.association_messages import RespondAssociationRequestMessage
 from syft.grid.messages.association_messages import RespondAssociationRequestResponse
 from syft.core.common.serde.serialize import _serialize
+from syft.grid.connections import get_response
 
 # grid relative
 from ..routes import association_requests_blueprint
@@ -118,15 +118,7 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
                 "login", (email, password, key, url), to=sid,
                 callback=answer_callback(ev)
             )
-            timeout = Timeout(10)
-            try:
-                response = ev.wait()
-            except Timeout:
-                print("answer timed out")
-                response = ""
-            finally:
-                timeout.cancel()
-
+            response = get_response(ev)
             # TODO: SESSION TOKEN
             return response # , url
 
@@ -148,15 +140,8 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
                 "pysyft", (data, key, email), to=sid,
                 callback=answer_callback(ev)
             )
-            timeout = Timeout(120)
-            try:
-                response = ev.wait()
-            except Timeout:
-                print("answer timed out")
-                response = ""
-            finally:
-                timeout.cancel()
-            return response #, url
+            response = get_response(ev, max_timeout=120)
+            return response
 
         @socketio.on("receive_association_request")
         def receive_association_request(payload: Dict[str, str]):
@@ -228,21 +213,9 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
                     "receive_association_request", payload, to=sid,
                     callback=answer_callback(ev)
                 )
-                timeout = Timeout(10)
-                try:
-                    response = ev.wait()
-                except Timeout:
-                    print("answer timed out")
-                    response = ""
-                finally:
-                    timeout.cancel()
+                get_response(ev)
 
                 # TODO: status code from socketio client
-                # response_message = (
-                #     "Association request replied!"
-                #     if response.status_code == 200
-                #     else "Association request could not be replied! Please, try again."
-                # )
             else:
                 raise AuthorizationError("You're not allowed to create an Association Request!")
 
@@ -285,14 +258,7 @@ def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
                     "get-all-tensors", to=sid,
                     callback=answer_callback(ev)
                 )
-                timeout = Timeout(10)
-                try:
-                    datasets = ev.wait()
-                except Timeout:
-                    print("answer timed out")
-                    datasets = {}
-                finally:
-                    timeout.cancel()
+                datasets = get_response(ev)
 
                 print("search-datasets filter_domains", datasets)
 
