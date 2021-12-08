@@ -38,11 +38,8 @@ def read_priv_key(path: str) -> bytes:
     return priv_key
 
 def decrypt_response(conn: Any, key: bytes, response: bytes) -> bytes:
-    # priv_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/private_ds_*_{url.split('/')[-1]}.pem")[0]
-    # priv_key = read_priv_key(priv_key_path)
-    # key = rsa.decrypt(key, priv_key)
     fernet = Fernet(key)
-    response = fernet.decrypt(response)  # [fernet.decrypt(r) for r in res[:-1]]
+    response = fernet.decrypt(response)
     response = response.decode().encode("ISO-8859-1")
     return response
 
@@ -60,16 +57,13 @@ def socket_wrapper(sio_ev: str, response_fn: Optional[Callable] = decrypt_respon
             sio.connect(self.network_url, wait_timeout=1000)
 
             res = f(self, *args, **kwargs)
-            # return schema: *data, key, role
             data, key = res[:-1], res[-1]
 
-            # key = copy.copy(res[-2])
             enc_key = rsa.encrypt(key, self.pub_key)
-            # url = res[-2]
 
             sio.emit(
                 sio_ev,
-                (self.base_url, *[*data, enc_key]), # , self.role]),
+                (self.base_url, *[*data, enc_key]),
                 callback=answer_callback
             )
 
@@ -88,12 +82,8 @@ def socket_wrapper(sio_ev: str, response_fn: Optional[Callable] = decrypt_respon
 def login_response(
         conn: Any, # TODO: GridWSConnection not referencable at this point
         key: bytes,
-        # url: str,
-        response: bytes # Dict[str, str]
+        response: bytes
 ) -> Tuple[Dict, str]:
-    # priv_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/private_ds_*_{url.split('/')[-1]}.pem")[0]
-    # priv_key = read_priv_key(priv_key_path)
-    # key = rsa.decrypt(key, priv_key)
     fernet = Fernet(key)
     response = fernet.decrypt(response)
     response = json.loads(response.decode())
@@ -111,46 +101,29 @@ class GridWSConnection(WSConnection):
             self,
             url: str,
             network_url: str = "http://localhost:7000",
-            # role: str = "ds"
     ):
         self.base_url = url
         self.network_url = network_url
 
         self.session_token = None
         self.pub_key = None
-        # if url.startswith("http"):
-        #     url = url.split('/')[-1]
-        # pub_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/public_{url}.pem")[0]
-        # self.pub_key = read_pub_key(pub_key_path)
-        # self.role = role
-        # self.priv_key = b""
 
     @socket_wrapper("pysyft")
     def _send_msg(self, msg: SyftMessage) -> Tuple[Union[bytes, str]]:
         msg_bytes: bytes = _serialize(obj=msg, to_bytes=True)  # type: ignore
         (enc_msg_bytes,), key = self.encode(msg_bytes.decode("ISO-8859-1"))
         return enc_msg_bytes, self.email, key
-        # return msg_bytes, key
 
     @socket_wrapper("login", login_response)
     def login(self, credentials: Dict[str, str]) -> Tuple[Union[bytes, str]]:
         self.email = credentials["email"]
         if self.pub_key is None:
             _email = re.sub("[.@]", "", credentials["email"])
-            # pub_key_path = glob.glob(os.path.expanduser( '~' ) + f"/.ssh/public_{self.url}_{_email}.pem")[0]
             _ip = self.base_url.split('/')[-1].split(':')[0]
             _ip = re.sub('[.:]', '', _ip)
             self.pub_key = read_pub_key(os.path.expanduser( '~' ) + f"/.ssh/public_{_ip}_{_email}.pem")
         (enc_pw,), key = self.encode(credentials["password"])
-        # enc_key = rsa.encrypt(key, self.pub_key)
         return credentials["email"], enc_pw, key
-        # return credentials["email"], credentials["password"]
-
-    # Receive metadata only needed in setup and that is done via http
-    # @socket_wrapper("metadata")
-    # def _get_metadata(self) -> None:
-    #     print("RECEIVING METADATA")
-    #     return
 
     @staticmethod
     def encode(*args) -> Any:
