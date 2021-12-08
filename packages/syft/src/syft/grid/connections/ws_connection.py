@@ -39,20 +39,8 @@ class WSConnection(ClientConnection):
         # and send it using HTTP protocol
         content = self._send_msg(msg=msg)
 
-        # if type(content) == str:
-        #     import pdb;pdb.set_trace()
-
         # Deserialize node's response
-        # if status_code == requests.codes.ok:
-            # Return SignedImmediateSyftMessageWithoutReply
         return _deserialize(blob=content, from_bytes=True)
-
-        # try:
-        #     response_json = json.loads(content)
-        #     raise RequestAPIException(response_json[RequestAPIFields.ERROR])
-        # except Exception as e:
-        #     print(f"Unable to json decode message. {e}")
-        #     raise e
 
     def send_immediate_msg_without_reply(
         self, msg: SignedImmediateSyftMessageWithoutReply
@@ -80,39 +68,3 @@ class WSConnection(ClientConnection):
         # Serializes SignedEventualSyftMessageWithoutReply in json format
         # and send it using HTTP protocol
         self._send_msg(msg=msg)
-
-    # def _send_msg(self, msg: SyftMessage) -> requests.Response:
-    #     """
-    #     Serializes Syft messages in json format and send it using HTTP protocol.
-    #
-    #     NOTE: Auxiliary method to avoid code duplication and modularity.
-    #
-    #     :return: returns requests.Response object containing a JSON serialized
-    #     SyftMessage
-    #     :rtype: requests.Response
-    #     """
-    #
-    #     # Perform HTTP request using base_url as a root address
-    #     data_bytes: bytes = _serialize(msg, to_bytes=True)  # type: ignore
-    #     import pdb;pdb.set_trace()
-    #     r = requests.post(
-    #         url=self.base_url,
-    #         data=data_bytes,
-    #         headers={"Content-Type": "application/octet-stream"}
-    #     )
-    #
-    #     # Return request's response object
-    #     # r.text provides the response body as a str
-    #     return r
-
-    # def _get_metadata(self) -> Metadata_PB:
-    #     """
-    #     Request Node's metadata
-    #
-    #     :return: returns node metadata
-    #     :rtype: str of bytes
-    #     """
-    #     data: bytes = requests.get(self.base_url + "/metadata").content
-    #     metadata_pb = Metadata_PB()
-    #     metadata_pb.ParseFromString(data)
-    #     return metadata_pb
