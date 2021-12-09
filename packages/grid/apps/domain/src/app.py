@@ -12,6 +12,9 @@
 import logging
 import os
 import sys
+from typing import Tuple
+
+from socketio import Client
 
 # third party
 import config
@@ -66,6 +69,7 @@ args = {
     "host": os.environ.get("GRID_NODE_HOST", "0.0.0.0"),
     "name": os.environ.get("GRID_NODE_NAME", "OpenMined"),
     "start_local_db": os.environ.get("LOCAL_DATABASE", False),
+    "use_websockets": os.environ.get("USE_WEBSOCKETS", False),
 }
 
 args_obj = type("args", (object,), args)()
@@ -76,7 +80,7 @@ def create_app(
     secret_key=DEFAULT_SECRET_KEY,
     debug=False,
     testing=False,
-) -> Flask:
+) -> Tuple[Flask, Client]:
     """This method creates a new Flask App instance and attach it with some
     HTTP/Websocket bluetprints.
 
@@ -94,7 +98,7 @@ def create_app(
     app.config.from_object("config")
 
     # Create Domain APP
-    app, node = create_domain_app(app=app, args=args, testing=testing)
+    app, socketio_client = create_domain_app(app=app, args=args, testing=testing)
     CORS(app)
 
     app.debug = debug
@@ -102,4 +106,4 @@ def create_app(
 
     # Send app instance
     logger.info(f"{app_info} is Ready")
-    return app, node
+    return app, socketio_client

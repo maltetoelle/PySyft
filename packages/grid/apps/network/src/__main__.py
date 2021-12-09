@@ -50,16 +50,26 @@ parser.add_argument(
     help="If this flag is used a SQLAlchemy DB URI is generated to use a local db.",
 )
 
+parser.add_argument(
+    "--use-websockets",
+    dest="use_websockets",
+    action="store_true",
+    help="If this flag is used websockets will be used instead of HTTP.",
+)
+
 parser.set_defaults(use_test_config=False)
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    app = create_app(args)
+    app, socketio = create_app(args)
     _address = "http://{}:{}".format(args.host, args.port)
 
-    server = pywsgi.WSGIServer(
-        (args.host, args.port), app, handler_class=WebSocketHandler
-    )
-    server.serve_forever()
+    if(args.use_websockets):
+        socketio.run(app, host=args.host, port=args.port, debug=True)
+    else:
+        server = pywsgi.WSGIServer(
+            (args.host, args.port), app, handler_class=WebSocketHandler
+        )
+        server.serve_forever()
