@@ -298,13 +298,20 @@ class Module:
         remote_model = copy.copy(self)
         remote_model.setup(torch_ref=client.torch)
         remote_model.duet = client
-
+        import pdb;pdb.set_trace()
         for name, module in self.modules.items():
             fqn = full_name_with_qualname(klass=type(module))
             klass = client.lib_ast.query(fqn, obj_type=type(module))
             module_repr = module.extra_repr()
             args, kwargs = repr_to_kwargs(repr_str=module_repr)
-            remote_module_ptr = klass(*args, **kwargs)
+
+            if fqn == "torch.nn.modules.container.Sequential":
+                remote_module_ptr = klass(module._modules)
+            elif fqn == "torch.nn.modules.container.ModuleList":
+                remote_module_ptr = klass(list(module._modules.values()))
+            else:
+                remote_module_ptr = klass(*args, **kwargs)
+
             remote_model.__setattr__(name, remote_module_ptr)
 
             # if the remote module has state_dict lets get it
