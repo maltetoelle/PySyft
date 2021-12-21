@@ -67,7 +67,7 @@ def create_worker_app(app, args):
 def create_network_app(app, args, testing=False) -> Tuple[Flask, SocketIO]:
     test_config = None
     if args.start_local_db:
-        test_config = {"SQLALCHEMY_DATABASE_URI": "sqlite:///nodedatabase.db"}
+        test_config = {"SQLALCHEMY_DATABASE_URI": "sqlite:///"+args.name+"_nodedatabase.db"}
 
     app.register_blueprint(roles_blueprint, url_prefix=r"/roles")
     app.register_blueprint(users_blueprint, url_prefix=r"/users")
