@@ -298,7 +298,7 @@ class Module:
         remote_model = copy.copy(self)
         remote_model.setup(torch_ref=client.torch)
         remote_model.duet = client
-        import pdb;pdb.set_trace()
+
         for name, module in self.modules.items():
             fqn = full_name_with_qualname(klass=type(module))
             klass = client.lib_ast.query(fqn, obj_type=type(module))

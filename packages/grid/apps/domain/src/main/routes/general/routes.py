@@ -67,7 +67,10 @@ def syft_route():
     from ...core.node import get_node  # TODO: fix circular import
 
     data = request.get_data()
+    # try:
     obj_msg = deserialize(blob=data, from_bytes=True)
+    # except:
+    # import pdb;pdb.set_trace()
     if isinstance(obj_msg, SignedImmediateSyftMessageWithReply):
         reply = get_node().recv_immediate_msg_with_reply(msg=obj_msg)
         r = Response(response=_serialize(obj=reply, to_bytes=True), status=200)

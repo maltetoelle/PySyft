@@ -16,6 +16,7 @@ import socketio
 from cryptography.fernet import Fernet
 import rsa
 import jwt
+from nacl.signing import VerifyKey
 from nacl.encoding import HexEncoder
 from flask import request
 from eventlet import event
@@ -147,7 +148,7 @@ def create_domain_app(app, args, testing=False):
     test_config = None
 
     if args.start_local_db:
-        test_config = {"SQLALCHEMY_DATABASE_URI": "sqlite:///nodedatabase.db"}
+        test_config = {"SQLALCHEMY_DATABASE_URI": f"sqlite:///nodedatabase_{args.name}.db"}
 
     # Bind websocket in Flask app instance
     sockets = Sockets(app)
@@ -243,6 +244,10 @@ def create_domain_app(app, args, testing=False):
             data = data.encode("ISO-8859-1")
             with app.app_context():
                 obj_msg = deserialize(blob=data, from_bytes=True)
+                # from syft.core.node.common.action.get_object_action import GetObjectAction
+                # msg = deserialize(obj_msg.serialized_message, from_bytes=True)
+                # if isinstance(msg, GetObjectAction):
+                #     import pdb;pdb.set_trace()
                 if isinstance(obj_msg, SignedImmediateSyftMessageWithReply):
                     reply = node.recv_immediate_msg_with_reply(msg=obj_msg)
                     reply_msg_bytes = _serialize(obj=reply, to_bytes=True)
@@ -276,6 +281,23 @@ def create_domain_app(app, args, testing=False):
                     )
 
                 return {"tensors": result}
+
+        @app.route("/ws_conn/add_auto_accept_email", methods=["POST"])
+        @token_required
+        def add_auto_accept_email(user: Any):
+            if user.role == 4:
+                email = request.json["email"]
+                for u in node.users.all():
+                    if u.email == email:
+                        verify_key_bytes = HexEncoder().decode(u.verify_key.encode("utf-8"))
+                        verify_key = VerifyKey(verify_key_bytes)
+                        if not hasattr(node, "accept_verify_keys"):
+                            node.accept_verify_keys = [verify_key]
+                        else:
+                            node.accept_verify_keys.append(verify_key)
+                        return {"message": "Success"}
+            else:
+                return {"message": "You are not allowed for this operation"}, 404
 
         @app.route("/ws_conn/send_association_request", methods=["POST"])
         @token_required
@@ -344,7 +366,6 @@ def create_domain_app(app, args, testing=False):
                 response_msg = recv_association_request_msg(msg=msg, node=node, verify_key=node.verify_key)
 
                 return response_msg.content
-
 
     # Set SQLAlchemy configs
     set_database_config(app, test_config=test_config)

@@ -75,7 +75,8 @@ if __name__ == "__main__":
     if(args.use_websockets):
         t = Thread(target=lambda: app.run(host="0.0.0.0", port=args.port)).start()
 
-        socketio_client.connect(f"http://{args.network_url}:7000", wait_timeout=10)
+        # socketio_client.connect("http://129.206.7.138", wait_timeout=10)
+        socketio_client.connect(f"http://{args.network_url}", wait_timeout=10)
     else:
         server = pywsgi.WSGIServer(
             (args.host, args.port), app, handler_class=WebSocketHandler
