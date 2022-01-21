@@ -175,8 +175,21 @@ class GetObjectAction(ImmediateActionWithReply):
 
             # if you are not the root user check if your verify_key has read_permission
             if (
-                verify_key != node.root_verify_key
-                and verify_key not in storable_object.read_permissions
+                (((hasattr(node, "accept_verify_keys") and
+                verify_key not in node.accept_verify_keys)
+                or not hasattr(node, "accept_verify_keys"))
+                and
+                (verify_key != node.root_verify_key
+                and verify_key not in storable_object.read_permissions))
+                or
+                (hasattr(node, "accept_verify_keys") and
+                verify_key in node.accept_verify_keys and
+                (verify_key != node.root_verify_key
+                and verify_key not in storable_object.read_permissions) and
+                storable_object.object_qualname in [
+                    "syft.core.remote_dataloader.remote_dataloader.RemoteDataset",
+                    "torch.Tensor"
+              ])
             ):
                 log = (
                     f"You do not have permission to .get() Object with ID: {self.id_at_location}"

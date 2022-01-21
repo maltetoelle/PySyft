@@ -16,7 +16,7 @@ from typing import Union
 import warnings
 
 # third party
-from eventlet.timeout import Timeout
+from nacl.signing import VerifyKey
 
 # syft relative
 from .. import ast
@@ -559,7 +559,7 @@ class Class(Callable):
             pointable: bool = True,
             description: str = "",
             tags: Optional[List[str]] = None,
-            searchable: Optional[bool] = None,
+            searchable: Optional[bool] = None
         ) -> Pointer:
             """Send obj to client and return pointer to the object.
 
@@ -630,7 +630,7 @@ class Class(Callable):
                 data=self,
                 tags=tags,
                 description=description,
-                search_permissions={VERIFYALL: None} if pointable else {},
+                search_permissions={VERIFYALL: None} if pointable else {}
             )
             obj_msg = SaveObjectAction(obj=storable, address=client.address)
 

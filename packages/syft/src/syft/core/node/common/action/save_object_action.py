@@ -1,5 +1,6 @@
 # stdlib
 from typing import Optional
+from typing import List
 
 # third party
 from google.protobuf.reflection import GeneratedProtocolMessageType
@@ -28,9 +29,11 @@ class SaveObjectAction(ImmediateActionWithoutReply, Serializable):
         obj: StorableObject,
         address: Address,
         msg_id: Optional[UID] = None,
+        # verify_keys: Optional[List[VerifyKey]] = None
     ):
         super().__init__(address=address, msg_id=msg_id)
         self.obj = obj
+        # self.verify_keys = verify_keys
 
     def __repr__(self) -> str:
         obj_str = str(self.obj)
@@ -48,6 +51,9 @@ class SaveObjectAction(ImmediateActionWithoutReply, Serializable):
             node.verify_key: node.id,
             verify_key: None,  # we dont have the passed in sender's UID
         }
+        # if self.verify_keys is not None:
+        #     for verify_key in self.verify_keys:
+        #         self.obj.read_permissions[verify_key] = None
         # mem_size = 0
         # _data = self.obj.data
         # if isinstance(_data, torch.Tensor):

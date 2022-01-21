@@ -106,7 +106,9 @@ class GridDomain(Domain):
         self.disk_store = DiskObjectStore(db)
         if not os.getenv("MEMORY_STORE", None):
             self.store = DiskObjectStore(db)
-            self.memory_store = MemoryStore()
+        else:
+            self.store = MemoryStore()
+        self.memory_store = MemoryStore()
         self.environments = EnvironmentManager(db)
         self.setup = SetupManager(db)
         self.association_requests = AssociationRequestManager(db)
