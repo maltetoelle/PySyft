@@ -148,7 +148,7 @@ def create_domain_app(app, args, testing=False):
     test_config = None
 
     if args.start_local_db:
-        test_config = {"SQLALCHEMY_DATABASE_URI": f"sqlite:///nodedatabase_{args.name}.db"}
+        test_config = {"SQLALCHEMY_DATABASE_URI": "sqlite:///"+args.name+"_nodedatabase.db"}
 
     # Bind websocket in Flask app instance
     sockets = Sockets(app)

@@ -1,7 +1,7 @@
 from typing import Any
 from eventlet import event
 
-def get_response(event: event.Event, timeout:float=0.1, max_timeout:float=10, default_return_value:Any=None):
+def get_response(event: event.Event, timeout:float=0.1, max_timeout:float=100, default_return_value:Any=None):
     """
     Await either the response for a websocket event or print to console if the event timed out
 
