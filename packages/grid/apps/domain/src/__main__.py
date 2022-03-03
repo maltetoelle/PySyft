@@ -61,7 +61,7 @@ parser.add_argument(
     "--network_url",
     type=str,
     help="Network grid node host, e.g. --host=0.0.0.0. Default is localhost.",
-    default=os.environ.get("NETWORK_HOST", "localhost"),
+    default=os.environ.get("NETWORK_HOST", "http://localhost:5001"),
 )
 
 parser.set_defaults(use_test_config=False)
@@ -85,6 +85,7 @@ if __name__ == "__main__":
             t = Thread(target=lambda: app.run(host="0.0.0.0", port=args.port)).start()
             # socketio_client.connect("http://129.206.7.138", wait_timeout=10)
             socketio_client.connect(f"http://{args.network_url}", wait_timeout=10)
+
     else:
         server = pywsgi.WSGIServer(
             (args.host, args.port), app, handler_class=WebSocketHandler
