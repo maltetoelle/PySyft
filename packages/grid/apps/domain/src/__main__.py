@@ -73,10 +73,18 @@ if __name__ == "__main__":
     _address = "http://{}:{}".format(args.host, args.port)
 
     if(args.use_websockets):
-        t = Thread(target=lambda: app.run(host="0.0.0.0", port=args.port)).start()
 
-        # socketio_client.connect("http://129.206.7.138", wait_timeout=10)
-        socketio_client.connect(f"http://{args.network_url}", wait_timeout=10)
+
+        if args.network_url is None:
+            network_url = os.environ.get("NETWORK_URL", "129.206.7.138")
+            port = os.environ.get("PORT", 5000)
+
+            t = Thread(target=lambda: app.run(host="0.0.0.0", port=port)).start()
+            socketio_client.connect(f"http://{network_url}", wait_timeout=10)
+        else:
+            t = Thread(target=lambda: app.run(host="0.0.0.0", port=args.port)).start()
+            # socketio_client.connect("http://129.206.7.138", wait_timeout=10)
+            socketio_client.connect(f"http://{args.network_url}", wait_timeout=10)
     else:
         server = pywsgi.WSGIServer(
             (args.host, args.port), app, handler_class=WebSocketHandler
